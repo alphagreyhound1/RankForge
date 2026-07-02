@@ -16,7 +16,15 @@ const LOADING_MESSAGES = [
   "Preparing your report…",
 ];
 
-export function AuditForm({ variant = "hero" }: { variant?: "hero" | "compact" }) {
+export function AuditForm({
+  variant = "hero",
+  onAuditComplete,
+  renderInlineResult = true,
+}: {
+  variant?: "hero" | "compact";
+  onAuditComplete?: (result: PageSpeedResult | null, strategy: "mobile" | "desktop") => void;
+  renderInlineResult?: boolean;
+}) {
   const [url, setUrl] = useState("");
   const [email, setEmail] = useState("");
   const [strategy, setStrategy] = useState<"mobile" | "desktop">("mobile");
@@ -73,6 +81,9 @@ export function AuditForm({ variant = "hero" }: { variant?: "hero" | "compact" }
       ]);
 
       setResult(auditResult);
+      if (onAuditComplete) {
+        onAuditComplete(auditResult, strategy);
+      }
       toast.success("Audit complete! Scroll down to view your results.");
       setUrl("");
       setEmail("");
@@ -158,7 +169,7 @@ export function AuditForm({ variant = "hero" }: { variant?: "hero" | "compact" }
             </button>
           </div>
         </form>
-        <AuditResultPanel result={result} strategy={strategy} />
+        {renderInlineResult && <AuditResultPanel result={result} strategy={strategy} />}
       </div>
     );
   }
