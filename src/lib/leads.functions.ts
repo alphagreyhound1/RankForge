@@ -37,7 +37,7 @@ function getSupabaseClient() {
 }
 
 export const submitLead = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => LeadSchema.parse(input))
+  .validator((input: unknown) => LeadSchema.parse(input))
   .handler(async ({ data }) => {
     const client = getSupabaseClient();
     const { error } = await client.from("leads").insert({

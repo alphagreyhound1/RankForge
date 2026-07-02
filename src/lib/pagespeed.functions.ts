@@ -79,7 +79,7 @@ function stripMarkdown(text: string): string {
 
 // ─── Server Function ──────────────────────────────────────────────────────────
 export const runPageSpeedAudit = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => PageSpeedInputSchema.parse(input))
+  .validator((input: unknown) => PageSpeedInputSchema.parse(input))
   .handler(async ({ data }): Promise<PageSpeedResult> => {
     const apiKey = process.env.PAGESPEED_API_KEY?.trim() || "";
     const hasApiKey = apiKey.length > 0;
