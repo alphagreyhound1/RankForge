@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
 
 const LeadSchema = z.object({
   name: z.string().trim().max(120).optional().nullable(),
@@ -11,11 +13,34 @@ const LeadSchema = z.object({
   source: z.string().trim().max(60).default("website"),
 });
 
+/**
+ * Returns a Supabase client suitable for lead inserts.
+ *
+ * Priority:
+ *   1. Service-role key (Lovable Cloud / production) — bypasses RLS
+ *   2. Publishable (anon) key — works locally; RLS allows INSERT per migration policy
+ */
+function getSupabaseClient() {
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey =
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!url) throw new Error("SUPABASE_URL is not set");
+
+  const key = serviceKey || anonKey;
+  if (!key) throw new Error("No Supabase key found (SUPABASE_SERVICE_ROLE_KEY or SUPABASE_PUBLISHABLE_KEY)");
+
+  return createClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
 export const submitLead = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => LeadSchema.parse(input))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("leads").insert({
+    const client = getSupabaseClient();
+    const { error } = await client.from("leads").insert({
       name: data.name ?? null,
       email: data.email,
       website: data.website ?? null,
