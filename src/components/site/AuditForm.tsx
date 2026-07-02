@@ -19,10 +19,12 @@ const LOADING_MESSAGES = [
 export function AuditForm({
   variant = "hero",
   onAuditComplete,
+  onUrlChange,
   renderInlineResult = true,
 }: {
   variant?: "hero" | "compact";
   onAuditComplete?: (result: PageSpeedResult | null, strategy: "mobile" | "desktop") => void;
+  onUrlChange?: (url: string) => void;
   renderInlineResult?: boolean;
 }) {
   const [url, setUrl] = useState("");
@@ -117,7 +119,10 @@ export function AuditForm({
                 required
                 placeholder="https://example.com"
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  if (onUrlChange) onUrlChange(e.target.value);
+                }}
                 className="w-full bg-transparent font-mono text-sm text-ink placeholder:text-charcoal/60 focus:outline-none"
                 data-testid="audit-url-input"
               />
@@ -189,7 +194,10 @@ export function AuditForm({
               required
               placeholder="https://example.com"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (onUrlChange) onUrlChange(e.target.value);
+              }}
               disabled={loading}
               className="w-full bg-transparent font-mono text-sm text-ink placeholder:text-charcoal/60 focus:outline-none disabled:opacity-50"
               data-testid="audit-url-input"

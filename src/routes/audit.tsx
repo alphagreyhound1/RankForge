@@ -280,9 +280,11 @@ function CWVRow({
 function AuditPage() {
   const [liveResult, setLiveResult] = useState<PageSpeedResult | null>(null);
   const [liveStrategy, setLiveStrategy] = useState<"mobile" | "desktop">("mobile");
+  const [typedUrl, setTypedUrl] = useState("");
 
   const isLive = liveResult !== null;
-  const domainInfo = isLive ? formatDomain(liveResult.url) : { main: "sample-demo", tld: ".com" };
+  const displayUrl = isLive ? liveResult.url : (typedUrl.trim() || "https://example.com");
+  const domainInfo = formatDomain(displayUrl);
   const overallScore = isLive ? liveResult.scores.overall : SPECIMEN_SCORE;
   const categories = isLive ? getDynamicCategories(liveResult) : CATEGORIES;
   const issues = isLive ? getDynamicIssues(liveResult) : ISSUES;
@@ -346,6 +348,7 @@ function AuditPage() {
               setLiveResult(res);
               if (strat) setLiveStrategy(strat);
             }}
+            onUrlChange={(u) => setTypedUrl(u)}
             renderInlineResult={false}
           />
         </div>
@@ -359,7 +362,9 @@ function AuditPage() {
             <span>
               {isLive
                 ? `§ Live Editorial Report — Generated for ${liveResult.url}`
-                : "§ Sample Illustration — Enter your URL above to generate your report"}
+                : typedUrl.trim()
+                  ? `§ Live Demo Preview — Report for ${displayUrl}`
+                  : "§ Live Demo Preview — Enter your URL above to generate your report"}
             </span>
             <span className="h-px flex-1 bg-border" />
           </div>
@@ -382,9 +387,9 @@ function AuditPage() {
                   </>
                 ) : (
                   <>
-                    <span>Sample Report #DEMO</span>
+                    <span>Live Demo Preview</span>
                     <span className="h-px w-8 bg-ink" />
-                    <span className="text-accent">Example illustration · Enter URL above to generate yours</span>
+                    <span className="text-accent">{typedUrl.trim() ? `Ready to audit ${displayUrl}` : "Enter URL above to generate your custom report"}</span>
                   </>
                 )}
               </div>
@@ -394,7 +399,9 @@ function AuditPage() {
               <p className="mt-6 text-base text-charcoal leading-relaxed max-w-xl">
                 {isLive
                   ? `Real-time diagnostic report generated from Google PageSpeed Insights (v5) for ${liveResult.url}. Below are your prioritized fixes, category breakdowns, and Core Web Vitals performance.`
-                  : "An illustration of what our clients receive. 84 diagnostic checks, prioritised by revenue impact, delivered as an editorial document. Run an audit above to generate your real report."}
+                  : typedUrl.trim()
+                    ? `Live diagnostic preview for ${displayUrl}. Click Run Audit above to execute 84 checks, prioritize fixes by revenue impact, and calculate your Core Web Vitals.`
+                    : "Live diagnostic preview for your website. Enter your website URL above and click Run Audit to execute 84 checks, prioritize fixes by revenue impact, and calculate your Core Web Vitals."}
               </p>
               <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 label-mono">
                 {isLive ? (
@@ -415,16 +422,16 @@ function AuditPage() {
                 ) : (
                   <>
                     <span>
-                      Domain age <span className="text-ink">4.2y</span>
+                      Target <span className="text-ink">{displayUrl}</span>
                     </span>
                     <span>
-                      Pages crawled <span className="text-ink">1,284</span>
+                      Status <span className="text-ink">Ready for Audit</span>
                     </span>
                     <span>
-                      Keywords tracked <span className="text-ink">2,401</span>
+                      Checks to run <span className="text-ink">84 checks</span>
                     </span>
                     <span>
-                      Report date <span className="text-ink">Q2 · 2026</span>
+                      Report date <span className="text-ink">{new Date().toLocaleDateString()}</span>
                     </span>
                   </>
                 )}
